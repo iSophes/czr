@@ -1,5 +1,5 @@
 use config::{Config, Value};
-use std::{collections::HashMap, error, process::exit, vec};
+use std::{collections::HashMap, process::exit, vec};
 
 use crate::util::util::display_error;
 
