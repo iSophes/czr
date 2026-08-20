@@ -7,7 +7,8 @@ const DEFAULT_CONFIG: &str = include_str!("../../config.toml");
 #[derive(Default, Deserialize)]
 pub struct Settings {
     pub enable_emojis: bool,
-    pub enable_commit_names: bool,
+    pub enable_commit_names: bool, // will be sorted soon
+
     pub commit_types: Vec<String>,
     pub commit_emojis: HashMap<String, String>,
     pub commit_descriptions: HashMap<String, String>,

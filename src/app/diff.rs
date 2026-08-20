@@ -3,27 +3,30 @@ use tokio::process::Command;
 use crate::util::util::display_error;
 
 pub async fn check_diffs() -> bool {
-    let unstaged_diff = Command::new("git").arg("diff").output().await.unwrap();
+    let unstaged_diff = Command::new("git")
+        .args(["status", "--porcelain"])
+        .output()
+        .await
+        .unwrap();
     let staged_diff = Command::new("git")
-        .arg("diff")
-        .arg("--cached")
+        .args(["diff", "--cached"])
         .output()
         .await
         .unwrap();
 
-    let are_changes_staged = unstaged_diff.stdout.is_empty();
+    let is_unstaging_empty = unstaged_diff.stdout.is_empty();
     let mut are_staged_empty = staged_diff.stdout.is_empty();
 
     // nothing staged or to stage
 
-    if are_changes_staged && are_staged_empty {
+    if is_unstaging_empty && are_staged_empty {
         display_error("You haven't made any changes. Nothing to commit.");
         return false;
     }
 
     // stuff to stage
 
-    if !are_changes_staged {
+    if !is_unstaging_empty {
         let result = dialoguer::Confirm::new()
             .with_prompt("You haven't staged all your commits. Would you like to?")
             .interact()

@@ -20,9 +20,13 @@ pub async fn push() -> bool {
         break;
     }
 
-    let result = Command::new("git").args(["branch", "-vv"]).output().await;
+    Command::new("git")
+        .arg("push")
+        .output()
+        .await
+        .expect("We had an issue pushing to your repository.");
 
-    println!("{:?}", result.is_ok());
+    display_success("Successfully pushed changes. Enjoy programming :)");
 
     return true;
 }
