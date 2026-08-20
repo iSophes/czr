@@ -7,6 +7,6 @@ edition = "2024"
 clap = { version = "4.6.6", features = ["derive"] }
 clearscreen = "4.0.6"
 config = "0.15.25"
-dialoguer = "0.12.0"
+dialoguer = { version = "0.12.0", features = ["fuzzy-select"] }
 owo-colors = "4.3.0"
 tokio = { version = "1.53.1", features = ["full"] }
