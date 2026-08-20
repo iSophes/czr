@@ -16,6 +16,6 @@ pub fn display_success(text: &str) {
     println!("{}", text.to_owned().bright_green());
 }
 
-pub fn clear_console() {
+pub fn _clear_console() {
     clear().expect("failed to clear screen");
 }
