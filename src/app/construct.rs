@@ -2,6 +2,7 @@ use std::vec;
 
 use dialoguer::FuzzySelect;
 use owo_colors::OwoColorize;
+use tokio::process::Command;
 
 use crate::{app::app_config, util::util::display_error};
 
@@ -18,8 +19,7 @@ pub async fn get_commit_type(settings: app_config::Settings) -> String {
                 val = converted_commit_type
             ))
             .to_owned()
-            .into_string()
-            .unwrap();
+            .to_string();
 
         if settings.enable_emojis {
             let mut emoji_string = settings
@@ -68,6 +68,8 @@ pub async fn get_commit_type(settings: app_config::Settings) -> String {
         .expect("Shouldn't be possible to get rid of the space.")
         .to_owned();
 
+    println!("{:?}", commit_type);
+
     let emoji_code = settings.commit_codes.get(&commit_type).unwrap();
 
     return format!("{code} {type}", code=emoji_code, type=commit_type);
@@ -104,6 +106,7 @@ async fn get_long_description() -> String {
             question = "?".bright_green().bold(),
             text = "Write a longer description".bold().white(),
         ))
+        .allow_empty(true)
         .interact_text()
         .unwrap();
 
@@ -118,6 +121,7 @@ async fn closes() -> String {
             text = "List any closed issues".bold().white(),
             info = "(#1, #2, ...)".default_color()
         ))
+        .allow_empty(true)
         .interact_text()
         .unwrap();
 
@@ -129,6 +133,19 @@ pub async fn construct_message(settings: app_config::Settings) -> bool {
     let short_description = get_short_description().await;
     let long_description = get_long_description().await;
     let closed = closes().await;
+
+    let finished_short = format!("{type}: {desc}", type=commit_type, desc=short_description);
+    let finished_description = format!(
+        "{long_description}\n\nCloses: {closed}",
+        long_description = long_description,
+        closed = closed
+    );
+
+    Command::new("git")
+        .args(["commit", "-m", &finished_short, "-m", &finished_description])
+        .output()
+        .await
+        .expect("We had an issue committing your code.");
 
     return true;
 }

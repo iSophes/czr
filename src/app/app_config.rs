@@ -1,70 +1,41 @@
-use config::{Config, Value};
-use std::{collections::HashMap, process::exit, vec};
+use config::{Config, ConfigError};
+use serde::Deserialize;
+use std::collections::HashMap;
 
-use crate::util::util::display_error;
+const DEFAULT_CONFIG: &str = include_str!("../../config.toml");
 
-#[derive(Default)]
+#[derive(Default, Deserialize)]
 pub struct Settings {
     pub enable_emojis: bool,
     pub enable_commit_names: bool,
-    pub commit_types: vec::Vec<Value>,
-    pub commit_emojis: HashMap<String, Value>,
-    pub commit_descriptions: HashMap<String, Value>,
-    pub commit_codes: HashMap<String, Value>,
+    pub commit_types: Vec<String>,
+    pub commit_emojis: HashMap<String, String>,
+    pub commit_descriptions: HashMap<String, String>,
+    pub commit_codes: HashMap<String, String>,
 }
 
 impl Settings {
     pub fn new() -> Self {
-        return Self::default();
+        Self::default()
     }
 
-    pub fn setup(&mut self) {
-        let settings = Config::builder()
-            .add_source(config::File::with_name("config"))
-            .add_source(config::Environment::with_prefix("APP"))
-            .build()
-            .unwrap();
+    pub fn setup(&mut self) -> Result<(), ConfigError> {
+        let user_config_path = dirs::config_dir().map(|p| p.join("czr/config.toml"));
 
-        let deserialised = settings
-            .try_deserialize::<HashMap<String, config::Value>>()
-            .expect("Failed to load config.");
+        let mut builder = Config::builder().add_source(config::File::from_str(
+            DEFAULT_CONFIG,
+            config::FileFormat::Toml,
+        ));
 
-        // this codes gonna be ass. ill try and figure out a refactor at some point
-
-        for x in deserialised.into_iter() {
-            match x.0.as_str() {
-                "enable_emojis" => {
-                    self.enable_emojis = x.1.into_bool().unwrap();
-                }
-
-                "enable_commit_names" => {
-                    self.enable_commit_names = x.1.into_bool().unwrap();
-                }
-
-                "commit_types" => {
-                    self.commit_types = x.1.into_array().unwrap();
-                }
-
-                "commit_emojis" => {
-                    self.commit_emojis = x.1.into_table().unwrap();
-                }
-
-                "commit_descriptions" => {
-                    self.commit_descriptions = x.1.into_table().unwrap();
-                }
-
-                "commit_codes" => {
-                    self.commit_codes = x.1.into_table().unwrap();
-                }
-
-                _ => {
-                    display_error(&format!(
-                        "Config {conf} is missing from the code.",
-                        conf = x.0
-                    ));
-                    exit(1);
-                }
-            }
+        if let Some(path) = user_config_path {
+            builder = builder.add_source(config::File::from(path).required(false));
         }
+
+        builder = builder.add_source(config::Environment::with_prefix("APP"));
+
+        let settings = builder.build()?;
+        *self = settings.try_deserialize::<Settings>()?;
+
+        Ok(())
     }
 }
