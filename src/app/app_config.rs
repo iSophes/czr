@@ -2,6 +2,8 @@ use config::{Config, ConfigError};
 use serde::Deserialize;
 use std::collections::HashMap;
 
+use crate::util::util::display_error;
+
 const DEFAULT_CONFIG: &str = include_str!("../../config.toml");
 
 #[derive(Default, Deserialize)]
@@ -36,6 +38,13 @@ impl Settings {
 
         let settings = builder.build()?;
         *self = settings.try_deserialize::<Settings>()?;
+
+        if !self.enable_commit_names && !self.enable_emojis {
+            display_error(
+                "Commit names and emojis are both disabled, only one or the other can be disabled. Defaulting to just commit names.",
+            );
+            self.enable_commit_names = true;
+        }
 
         Ok(())
     }

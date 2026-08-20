@@ -42,7 +42,11 @@ pub async fn get_commit_type(settings: app_config::Settings) -> String {
             continue;
         }
 
-        item_strings.push(converted_commit_type);
+        item_strings.push(format!(
+            "{converted_commit_type}: {description}",
+            converted_commit_type = converted_commit_type,
+            description = description
+        ));
     }
 
     let selected_type = FuzzySelect::new()
@@ -58,21 +62,27 @@ pub async fn get_commit_type(settings: app_config::Settings) -> String {
         .interact()
         .unwrap();
 
-    let commit_type = item_strings[selected_type]
-        .split(":")
-        .next()
-        .expect("Shouldn't be possible to get rid of the colon.")
-        .to_owned()
-        .split(" ")
-        .nth(1)
-        .expect("Shouldn't be possible to get rid of the space.")
-        .to_owned();
+    let commit_type = if settings.enable_commit_names {
+        item_strings[selected_type]
+            .split(":")
+            .next()
+            .expect("Shouldn't be possible to get rid of the colon.")
+            .to_owned()
+            .split(" ")
+            .nth(1)
+            .expect("Shouldn't be possible to get rid of the space.")
+            .to_owned()
+    } else {
+        "".to_string()
+    };
 
-    println!("{:?}", commit_type);
+    let emoji_code = if settings.enable_commit_names {
+        &format!("{e} ", e = settings.commit_codes.get(&commit_type).unwrap())
+    } else {
+        ""
+    };
 
-    let emoji_code = settings.commit_codes.get(&commit_type).unwrap();
-
-    return format!("{code} {type}", code=emoji_code, type=commit_type);
+    return format!("{code}{type}", code=emoji_code, type=commit_type);
 }
 
 async fn get_short_description() -> String {

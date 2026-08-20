@@ -1,5 +1,5 @@
 "enable_emojis" = true
-"enable_commit_names" = true
+"enable_commit_names" = false
 
 "commit_types" = [
   "fix",
