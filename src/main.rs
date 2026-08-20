@@ -3,7 +3,7 @@ use std::process::exit;
 use clap::Parser;
 use tokio::process::Command;
 
-use crate::app::{diff, initialise};
+use crate::app::{app_config, diff, initialise};
 
 mod app;
 mod util;
@@ -18,6 +18,9 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    let mut new_settings = app_config::Settings::new();
+    new_settings.setup();
+
     let status = Command::new("git").arg("status").output().await.unwrap();
 
     if !status.status.success() {
