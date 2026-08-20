@@ -58,11 +58,19 @@ pub async fn get_commit_type(settings: app_config::Settings) -> String {
         .interact()
         .unwrap();
 
-    return item_strings[selected_type]
+    let commit_type = item_strings[selected_type]
         .split(":")
         .next()
         .expect("Shouldn't be possible to get rid of the colon.")
+        .to_owned()
+        .split(" ")
+        .nth(1)
+        .expect("Shouldn't be possible to get rid of the space.")
         .to_owned();
+
+    let emoji_code = settings.commit_codes.get(&commit_type).unwrap();
+
+    return format!("{code} {type}", code=emoji_code, type=commit_type);
 }
 
 async fn get_short_description() -> String {
@@ -102,9 +110,25 @@ async fn get_long_description() -> String {
     return long;
 }
 
+async fn closes() -> String {
+    let closes: String = dialoguer::Input::new()
+        .with_prompt(&format!(
+            "{question} {text} {info}",
+            question = "?".bright_green().bold(),
+            text = "List any closed issues".bold().white(),
+            info = "(#1, #2, ...)".default_color()
+        ))
+        .interact_text()
+        .unwrap();
+
+    return closes;
+}
+
 pub async fn construct_message(settings: app_config::Settings) -> bool {
     let commit_type = get_commit_type(settings).await;
     let short_description = get_short_description().await;
     let long_description = get_long_description().await;
+    let closed = closes().await;
+
     return true;
 }
