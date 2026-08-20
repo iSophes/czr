@@ -1,4 +1,3 @@
-use clearscreen::clear;
 use owo_colors::OwoColorize;
 
 /// display info
@@ -14,8 +13,4 @@ pub fn display_error(text: &str) {
 /// display success message
 pub fn display_success(text: &str) {
     println!("{}", text.to_owned().bright_green());
-}
-
-pub fn _clear_console() {
-    clear().expect("failed to clear screen");
 }
