@@ -19,7 +19,12 @@
 
 ## Installation
 
-TBD.
+There's a github releases page with an exe. Build and compile for your platform.
+
+## Usage
+
+`czr` - Runs the tool
+`czr config` - Runs config wizard, currently only two configs.
 
 ## License
 
