@@ -62,27 +62,29 @@ pub async fn get_commit_type(settings: app_config::Settings) -> String {
         .interact()
         .unwrap();
 
-    let commit_type = if settings.enable_commit_names {
-        item_strings[selected_type]
-            .split(":")
-            .next()
-            .expect("Shouldn't be possible to get rid of the colon.")
-            .to_owned()
-            .split(" ")
-            .nth(1)
-            .expect("Shouldn't be possible to get rid of the space.")
-            .to_owned()
-    } else {
-        "".to_string()
-    };
+    let commit_type = item_strings[selected_type]
+        .split(":")
+        .next()
+        .expect("Shouldn't be possible to get rid of the colon.")
+        .to_owned()
+        .split(" ")
+        .nth(1)
+        .expect("Shouldn't be possible to get rid of the space.")
+        .to_owned();
 
-    let emoji_code = if settings.enable_commit_names {
+    let emoji_code = if settings.enable_emojis {
         &format!("{e} ", e = settings.commit_codes.get(&commit_type).unwrap())
     } else {
         ""
     };
 
-    return format!("{code}{type}", code=emoji_code, type=commit_type);
+    let display_type = if settings.enable_commit_names {
+        commit_type
+    } else {
+        "".to_owned()
+    };
+
+    return format!("{code}{type}", code=emoji_code, type=display_type);
 }
 
 async fn get_short_description() -> String {
