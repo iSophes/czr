@@ -19,6 +19,12 @@
 
 ## Installation
 
+**Recommended: Cargo**
+
+`cargo install czr`
+
+_Github releases_
+
 There's a github releases page with an exe. Build and compile for your platform. You'll have to add it to path as well.
 
 ## Usage
