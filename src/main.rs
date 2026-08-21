@@ -25,6 +25,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Configure the tool. Currently only contains two configurable values.
     Config {},
 }
 
