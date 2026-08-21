@@ -1,7 +1,15 @@
 [package]
 name = "czr"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
+authors = ["Sophie B <sophie@astrofoxstudios.com>"]
+readme = "README.md"
+description = "Git helper, inspired by cz-git. Pronounced \"cesar\" (like Julius Cesar!)"
+license = "MIT"
+keywords = ["cli", "git", "helper", "util"]
+categories = ["command-line-utilities"]
+homepage = "https://github.com/isophes/czr"
+repository = "https://github.com/isophes/czr"
 
 [dependencies]
 clap = { version = "4.6.6", features = ["derive"] }
