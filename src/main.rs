@@ -1,29 +1,34 @@
 use std::process::exit;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use tokio::process::Command;
 
 use crate::{
-    app::{app_config, construct::construct_message, diff, initialise, push::push},
+    app::{
+        app_config::{self, Settings},
+        construct::construct_message,
+        diff, initialise,
+        push::push,
+    },
     util::util::display_success,
 };
 
 mod app;
 mod util;
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// Type of commit to commit.
-    #[arg(short)]
-    commit_type: Option<String>,
+/// CZR is a program to help you write git commits.
+#[derive(Parser)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
 }
 
-#[tokio::main]
-async fn main() {
-    let mut new_settings = app_config::Settings::new();
-    let _ = new_settings.setup();
+#[derive(Subcommand)]
+enum Commands {
+    Config {},
+}
 
+async fn run_program(new_settings: Settings) {
     let status = Command::new("git").arg("status").output().await.unwrap();
 
     if !status.status.success() {
@@ -45,5 +50,23 @@ async fn main() {
 
     if !push().await {
         exit(0)
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let mut new_settings = app_config::Settings::new();
+    let _ = new_settings.setup();
+
+    let cli = Cli::parse();
+    match cli.command {
+        Some(Commands::Config {}) => {
+            let result = new_settings.call_settings();
+            if result.is_ok() {
+                display_success("Configuration successful.");
+                exit(0);
+            }
+        }
+        _ => run_program(new_settings).await,
     }
 }
